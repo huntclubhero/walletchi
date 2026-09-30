@@ -1,0 +1,273 @@
+# WALLETCHI dead-man heartbeat. The settlement endgame depends on the API being
+# alive (the auto-defender must hold the challenge window), so an independent
+# watcher pings production every 15 minutes and fails LOUDLY when it is down or
+# degraded. A workflow failure emails repo watchers; the failure step also
+# opens/refreshes a pinned issue so the outage is visible in the repo.
+#
+# It watches three layers, because "the API answers 200" was blind to every
+# failure mode this system actually has:
+#   1. PUBLIC liveness: /health, /api/season/stats, the site.
+#   2. SEASON state: a PetVault the server can no longer read (every pass falls
+#      back to placeholder numbers), or a season that has ended.
+#   3. INTERNAL health: relayer gas, the dedicated Merkle poster's gas, and
+#      whether holder rounds can actually post. All three fail SILENTLY in
+#      production: a dry key stalls writes with no error page at all.
+#
+# REQUIRED SECRET for layer 3: INTERNAL_STATUS_TOKEN
+#   /internal/status is bearer authenticated, so this workflow needs the token.
+#   Set it under Settings > Secrets and variables > Actions > New repository
+#   secret, with the SAME value as the API service's INTERNAL_STATUS_TOKEN env.
+#   When the secret is absent the internal step SKIPS and stays GREEN, so a fork
+#   or an unconfigured clone raises no false alarms; layers 1 and 2 still run.
+#
+# Every alarm below prints what is wrong AND what to do about it. Conditions that
+# are simply normal (no pets minted yet, no holder round posted yet, nothing
+# unreserved to distribute, a poster check that has not run) are reported as
+# information and never fail the run.
+name: heartbeat
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: health
+        run: |
+          set -e
+          body=$(curl -sS --max-time 20 https://api.playwalletchi.com/health)
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"' || { echo "HEALTH NOT OK"; exit 1; }
+      # Every later step runs even when an earlier one failed, so one run reports
+      # the WHOLE picture instead of stopping at the first red light.
+      - name: season stats and vault reachability
+        if: ${{ !cancelled() }}
+        env:
+          # A season END (wipe or champion) is a real alarm exactly once. After a
+          # human has seen it, set the repo variable SEASON_END_ACK to the printed
+          # "<registered>-<alive>" pair (e.g. "9-0") and the SAME terminal state
+          # reports green instead of re-alarming every 15 minutes forever. Any
+          # OTHER terminal state (a new season ending) alarms again, because the
+          # pair will not match. A fresh season deploy should clear the variable.
+          SEASON_END_ACK: ${{ vars.SEASON_END_ACK }}
+        run: |
+          set -e
+          body=$(curl -sS --max-time 20 https://api.playwalletchi.com/api/season/stats)
+          echo "$body"
+          echo "$body" | grep -q '"cubsTotal"' || { echo "SEASON STATS MALFORMED"; exit 1; }
+          active=$(echo "$body" | jq -r '.seasonActive')
+          alive=$(echo "$body" | jq -r '.cubsAlive // 0')
+          registered=$(echo "$body" | jq -r '.registered // 0')
+          echo "season active: $active | alive: $alive | registered: $registered"
+          # CLOCK MODEL (Testnet Experience, 2026-09-23): while the mint window is open the
+          # season cannot be decided, so "0 alive" or "1 alive" is a colony that needs new
+          # keepers, not a season end. Only alarm on those once entryOpen is false.
+          entry_open=$(curl -sS --max-time 20 https://api.playwalletchi.com/api/chain-config | jq -r '.season.entryOpen // false')
+          echo "mint window open: $entry_open"
+          fail=0
+          if [ "$registered" = "0" ]; then
+            # NORMAL: before the mint there is nothing to be alive, the season flag
+            # is off by design and every figure is a pre-season stub.
+            echo "no pets registered yet: pre-season stub, nothing to alarm on."
+          elif [ "$active" != "true" ]; then
+            echo "ALERT: $registered pets are registered but the season reads INACTIVE, so the API is serving pre-season STUB numbers."
+            echo "That is a PetVault read failure (or PETVAULT_ADDRESS / SURVIVAL_ENABLED got unset): the site, the pass stats band and every Google hero are showing placeholders instead of the real pot and headcount."
+            echo "DO: check the Robinhood RPC and PETVAULT_ADDRESS on the API service, then re-read /internal/status."
+            fail=1
+          elif [ "$alive" = "0" ]; then
+            if [ "$entry_open" = "true" ]; then
+              echo "0 of $registered alive while the mint window is open: not a season end under the clock model, reporting only."
+            elif [ "$SEASON_END_ACK" = "$registered-$alive" ]; then
+              echo "season ended with no survivor (0 of $registered) and this end is ACKNOWLEDGED (SEASON_END_ACK=$SEASON_END_ACK): reporting, not alarming."
+            else
+              echo "ALERT: ZERO pets alive out of $registered registered. The season ended with no survivor."
+              echo "DO: confirm settlement state on the vault and keep the API up through the challenge window. Break-glass defender: scripts/defender-standalone.ts (see the file header)."
+              echo "Once handled, acknowledge with: gh variable set SEASON_END_ACK --body \"$registered-$alive\" (repo Settings > Secrets and variables > Actions > Variables). The other checks keep running."
+              fail=1
+            fi
+          elif [ "$alive" = "1" ] && [ "$registered" -ge 2 ]; then
+            if [ "$entry_open" = "true" ]; then
+              echo "1 of $registered alive while the mint window is open: not a champion under the clock model, reporting only."
+            elif [ "$SEASON_END_ACK" = "$registered-$alive" ]; then
+              echo "champion crowned (1 of $registered) and this end is ACKNOWLEDGED (SEASON_END_ACK=$SEASON_END_ACK): reporting, not alarming."
+            else
+              echo "ALERT: ONE pet left out of $registered. A champion has been crowned, so the season is OVER and the settlement window is what matters now."
+              echo "DO: verify the auto-defender is running and can answer for the whole challenge window. Break-glass: scripts/defender-standalone.ts (see the file header)."
+              echo "Only acknowledge AFTER settlement is confirmed safe: gh variable set SEASON_END_ACK --body \"$registered-$alive\"."
+              fail=1
+            fi
+          fi
+          exit $fail
+      - name: site
+        if: ${{ !cancelled() }}
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 https://www.playwalletchi.com/)
+          echo "site HTTP $code"
+          test "$code" = "200"
+      # Layer 3. Skips CLEANLY (green) without the secret, see the header note.
+      - name: relayer gas, poster gas and holder round posting
+        if: ${{ !cancelled() }}
+        env:
+          TOKEN: ${{ secrets.INTERNAL_STATUS_TOKEN }}
+        run: |
+          set -e
+          if [ -z "$TOKEN" ]; then
+            echo "INTERNAL_STATUS_TOKEN is not set for this repository."
+            echo "SKIPPING the internal checks (relayer gas, Merkle poster gas, holder round posting). This is not a failure."
+            echo "To arm them: Settings > Secrets and variables > Actions > New repository secret, name INTERNAL_STATUS_TOKEN, value = the API service's INTERNAL_STATUS_TOKEN env."
+            exit 0
+          fi
+          code=$(curl -sS -o status.json -w "%{http_code}" --max-time 25 -H "authorization: Bearer $TOKEN" https://api.playwalletchi.com/internal/status || true)
+          code=${code:-000}
+          if [ "$code" != "200" ]; then
+            echo "ALERT: /internal/status answered HTTP $code, so NONE of the gas or posting alarms could be evaluated. The watcher is blind until this is fixed."
+            echo "401 = the INTERNAL_STATUS_TOKEN secret no longer matches the API service env. 404 = the API has no INTERNAL_STATUS_TOKEN set at all, so the route disables itself. 000 or 5xx = the API is unreachable or degraded."
+            echo "DO: compare this repo's INTERNAL_STATUS_TOKEN secret against the API service env, then re-run this workflow."
+            exit 1
+          fi
+          # The response is an operational map (key addresses, modes, balances), so
+          # this step prints only the figures it judges, never the whole body.
+          fail=0
+
+          # 1. RELAYER GAS. Every care action, every mint and every pass refresh is
+          # signed by this key. A dry relayer does not error a page: writes just
+          # stop landing, which reads to a keeper as "my pet ignored me".
+          relayer_err=$(jq -r '.relayerHealth.error // ""' status.json)
+          relayer_eth=$(jq -r '.relayerHealth.balanceEth // "unknown"' status.json)
+          relayer_low=$(jq -r '.relayerHealth.low // false' status.json)
+          relayer_addr=$(jq -r '.relayerHealth.address // "unknown"' status.json)
+          # The SAME floor gates both keys (RELAYER_LOW_BALANCE_ETH), so the poster
+          # block below reuses it.
+          threshold=$(jq -r '.relayerHealth.lowThresholdEth // "unknown"' status.json)
+          pending=$(jq -r '.relayerHealth.pendingWrites // 0' status.json)
+          echo "relayer $relayer_addr: $relayer_eth ETH (floor $threshold), $pending queued writes"
+          if [ -n "$relayer_err" ]; then
+            echo "ALERT: the relayer gas balance is UNREADABLE ($relayer_err), so a dry relayer would go unnoticed."
+            echo "DO: check the Robinhood RPC URL on the API service. If the RPC is healthy, check the relayer key itself."
+            fail=1
+          elif [ "$relayer_low" = "true" ]; then
+            echo "ALERT: RELAYER GAS LOW. $relayer_eth ETH is under the low-balance floor (RELAYER_LOW_BALANCE_ETH = $threshold)."
+            echo "DO: fund $relayer_addr on Robinhood Chain now. Below zero it stops signing care, mints and claims, and every one of those fails silently."
+            fail=1
+          fi
+
+          # 2 and 3. HOLDER ROUNDS. The airdrop leg is signed by a SEPARATE poster
+          # key and gated on-chain by poster(), the per-round cap and a pause flag.
+          # Each of those fails as a silent revert inside a background job.
+          rewards_live=$(jq -r '.holderRounds.holderRewardsLive // false' status.json)
+          posting_live=$(jq -r '.holderRounds.postingLive // false' status.json)
+          poster_configured=$(jq -r '.holderRounds.posterConfigured // false' status.json)
+          poster_addr=$(jq -r '.holderRounds.posterAddress // "unset"' status.json)
+          rounds_posted=$(jq -r '.holderRounds.roundsPosted // 0' status.json)
+          skip_reason=$(jq -r '.holderRounds.lastSkipReason // ""' status.json)
+          echo "holder rounds: rewardsLive=$rewards_live postingLive=$posting_live poster=$poster_addr roundsPosted=$rounds_posted"
+          if [ -n "$skip_reason" ]; then echo "last skip reason: $skip_reason"; fi
+          if [ "$rewards_live" != "true" ]; then
+            # NORMAL before the tax economy is switched on: nothing to post, so
+            # none of the posting alarms below can mean anything yet.
+            echo "holder rewards are not live: skipping the poster and posting checks."
+          else
+            if [ "$poster_configured" != "true" ]; then
+              echo "ALERT: holder rewards are LIVE but NO poster key is configured, so postRound would revert NotPoster and the airdrop leg is dark."
+              echo "DO: set HOLDER_POSTER_PRIVATE_KEY on the API service, confirm it matches the vault's poster(), then redeploy."
+              fail=1
+            else
+              # 2. POSTER GAS. A dedicated signer has its own tank and a fresh
+              # poster key starts empty, which stalls every round for a reason no
+              # key check can explain.
+              poster_bal_err=$(jq -r '.holderRounds.posterBalanceError // ""' status.json)
+              poster_eth=$(jq -r '.holderRounds.posterBalanceEth // "unknown"' status.json)
+              poster_low=$(jq -r '.holderRounds.posterGasLow // false' status.json)
+              echo "poster $poster_addr: $poster_eth ETH"
+              if [ -n "$poster_bal_err" ]; then
+                echo "ALERT: the Merkle poster's gas balance is UNREADABLE ($poster_bal_err)."
+                echo "DO: check the Robinhood RPC on the API service. An unfunded poster stalls every holder round and this is the only place that shows it."
+                fail=1
+              elif [ "$poster_low" = "true" ]; then
+                echo "ALERT: MERKLE POSTER GAS LOW. $poster_eth ETH is under the low-balance floor (RELAYER_LOW_BALANCE_ETH = $threshold)."
+                echo "DO: fund $poster_addr on Robinhood Chain. This key is NOT the relayer and has its own tank; empty, it posts no holder round and the fee stream just piles up unreserved."
+                fail=1
+              fi
+            fi
+
+            # 3. POSTING HEALTH. Each of these bricks the leg silently.
+            matches=$(jq -r '.holderRounds.posterMatchesOnChain' status.json)
+            on_chain_poster=$(jq -r '.holderRounds.onChainPoster // "unknown"' status.json)
+            paused=$(jq -r '.holderRounds.postingPaused' status.json)
+            cap=$(jq -r '.holderRounds.maxRoundTotalRaw // "unread"' status.json)
+            failures=$(jq -r '.holderRounds.consecutiveFailures // 0' status.json)
+            if [ "$matches" = "false" ]; then
+              echo "ALERT: POSTER MISMATCH. Our configured poster is $poster_addr but the vault's poster() is $on_chain_poster, so every postRound reverts NotPoster and no holder round can land."
+              echo "DO: either point HOLDER_POSTER_PRIVATE_KEY at the on-chain poster, or rotate the vault's poster to our key (queuePoster then commitPoster, behind the timelock)."
+              fail=1
+            elif [ "$matches" = "null" ]; then
+              # NORMAL: the check has not run yet, or an RPC blip made the read
+              # inconclusive. An unread value is not a verdict about a key.
+              echo "poster match not verified yet (no reading since restart): not an alarm."
+            fi
+            if [ "$paused" = "true" ]; then
+              echo "ALERT: HOLDER ROUND POSTING IS PAUSED on the vault (owner emergency stop). Nothing will be distributed while it stands."
+              echo "DO: if the pause was deliberate, resolve whatever caused it and unpause. If nobody paused it on purpose, treat the vault owner key as compromised and escalate."
+              fail=1
+            fi
+            if [ "$posting_live" = "true" ] && [ "$cap" = "0" ]; then
+              echo "ALERT: the vault's per-round cap is UNARMED (maxRoundTotal is 0). That is fail-closed, not unlimited: every round reverts RoundCapNotArmed."
+              echo "DO: the vault owner must call setMaxRoundTotal once for this deployment."
+              fail=1
+            fi
+            if [ "$failures" -gt 0 ]; then
+              echo "ALERT: holder round posting has failed $failures times in a row. The leg is stuck and is retrying into the same wall every cycle."
+              echo "Last skip reason: ${skip_reason:-none recorded}"
+              echo "DO: read the holderRounds block on /internal/status and the API logs around the last attempt, then fix the named gate (poster key, cap, pause or gas)."
+              fail=1
+            fi
+            if [ "$rounds_posted" = "0" ]; then
+              # NORMAL: a season that has not distributed yet has posted no rounds,
+              # and "nothing unreserved to distribute" is the ordinary quiet state.
+              echo "no holder round posted yet: normal until the first distribution clears the minimum."
+            fi
+          fi
+          exit $fail
+      - name: raise the alarm
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="HEARTBEAT FAILING: api.playwalletchi.com"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number')
+          when=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "Still failing at $when. The failing step names the alarm and the fix: $run_url"
+          else
+            # Written through a file so the body can carry real paragraphs without
+            # breaking out of this block scalar (and without indenting itself into
+            # a markdown code block).
+            printf '%s\n\n%s\n\n%s\n' \
+              "The production heartbeat failed at $when. Open the run and read the FAILING STEP: every alarm prints what is wrong and what to do about it. Run: $run_url" \
+              "What it watches: /health and the site; the PetVault staying readable and the season not being over; relayer gas; the dedicated Merkle poster's gas; and whether holder rounds can actually post (poster match, pause flag, round cap, consecutive failures)." \
+              "If the season is CLOSED this is URGENT: the auto-defender may be down during the challenge window. Break-glass: run scripts/defender-standalone.ts from any machine (see the file header)." > alarm-body.md
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file alarm-body.md
+          fi
+      # The counterpart of the alarm: a green run closes the pinned issue, so
+      # "the issue is open" always means "the last run was red" and recovery
+      # needs no human bookkeeping.
+      - name: stand down
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="HEARTBEAT FAILING: api.playwalletchi.com"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            when=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "Healthy again at $when (every check green): $run_url"
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY"
+          fi

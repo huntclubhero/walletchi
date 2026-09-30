@@ -1,0 +1,26 @@
+{
+  "network": "robinhood-testnet",
+  "chainId": 46630,
+  "deployedAt": "2026-07-24",
+  "rpc": "https://rpc.testnet.chain.robinhood.com",
+  "explorer": "https://explorer.testnet.chain.robinhood.com",
+  "contracts": {
+    "CardIssuer": "0xCf116d722f6562c9A2197E91Fa475575aC7791D4",
+    "PunchCard721": "0xF60b7Ab3343318004FdF0d79c0562aB5f42f05Ca",
+    "PunchAccountImpl": "0x0A7eF0f802FA7AE9618F1DF922cB55bd96665e66",
+    "PUNCH": "0x30920d178151Df87fc742A4B33EBf6b8713FbE48",
+    "USDG": "0x39f23A5AF1F47FBeeEC3F0D98a253511a5779F31",
+    "ERC6551Registry": "0x000000006551c19487814612e58FE06813775758"
+  },
+  "usdgIsMock": true,
+  "usdgDecimals": 6,
+  "deployer": "0x5a97eF885F4369b52dbb23E7cA2FDAe05fB62e6F",
+  "relayer": "0x5a97eF885F4369b52dbb23E7cA2FDAe05fB62e6F",
+  "treasury": "0x5a97eF885F4369b52dbb23E7cA2FDAe05fB62e6F",
+  "config": {
+    "perTxCapRaw": "25000000",
+    "dailyCapRaw": "100000000",
+    "punchTarget": 10,
+    "maxSupply": 500
+  }
+}

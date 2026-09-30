@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.p12
+*.pem
+*.key
+serviceaccount*.json
+assets/generated/
+prisma/dev.db
+*.log

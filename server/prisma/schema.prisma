@@ -1,0 +1,344 @@
+// PUNCHCARD Prisma schema.
+// Postgres in every environment. Local dev via docker one-liner or Neon (see README).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A minted PUNCHCARD: the NFT + its ERC-6551 token bound account and cached balances.
+model Card {
+  serial        String   @id @default(uuid())
+  tokenId       String?  // decimal string; null until mint confirmed
+  tbaAddress    String?  // ERC-6551 account address
+  ownerAddress  String
+  email         String
+  balanceCache  Int      @default(0) // USDG value in cents
+  punchesCache  Int      @default(0)
+  authToken     String   @unique // Apple pass authenticationToken (ApplePass header)
+  issueTxHash   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  registrations AppleDeviceRegistration[]
+  redemptions   Redemption[]
+
+  @@index([ownerAddress])
+  @@index([email])
+}
+
+// Buy-flow session. Tracks Base payment -> Robinhood mint lifecycle.
+model CheckoutSession {
+  id            String   @id @default(uuid())
+  email         String
+  walletAddress String
+  status        String   @default("pending") // pending | paid | minting | ready | failed
+  priceCents    Int
+  loadCents     Int
+  paymentTxHash String?  // Base USDC transfer that funded us
+  serial        String?  // set when the resulting Card is created
+  txHashes      String[] @default([]) // Robinhood chain tx hashes (issueCard etc.)
+  failureReason String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([walletAddress])
+  @@index([status])
+}
+
+// Apple Wallet Web Service device registration.
+model AppleDeviceRegistration {
+  deviceLibraryId String
+  passTypeId      String
+  serial          String
+  pushToken       String
+  createdAt       DateTime @default(now())
+
+  card Card @relation(fields: [serial], references: [serial], onDelete: Cascade)
+
+  @@id([deviceLibraryId, passTypeId, serial])
+  @@index([serial])
+  @@index([passTypeId, serial])
+}
+
+// One row per redeemed QR token. jti is the replay guard (unique).
+model Redemption {
+  jti         String   @id
+  serial      String
+  amountCents Int
+  vendorId    String
+  txHash      String?
+  freeCoffee  Boolean  @default(false)
+  punchesAfter Int     @default(0)
+  balanceAfterCents Int @default(0)
+  createdAt   DateTime @default(now())
+
+  card   Card   @relation(fields: [serial], references: [serial], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+
+  @@index([serial])
+  @@index([createdAt])
+}
+
+// Coffee vendor with a PIN gate and payout wallet.
+model Vendor {
+  id     String @id @default(uuid())
+  name   String
+  pin    String
+  wallet String
+
+  redemptions Redemption[]
+}
+
+// SALMON RUN (playable NFT sidecar). Additive: separate tables from PUNCHCARD.
+
+// A minted CUB: the NFT + its ERC-6551 account and cached game stats.
+model Runner {
+  serial        String   @id @default(uuid())
+  tokenId       String?  // decimal string; null until mint confirmed
+  tbaAddress    String?  // ERC-6551 account address
+  ownerAddress  String   // custodial relayer address for the demo mint
+  email         String
+  bestScore     Int      @default(0) // best run distance in meters
+  salmon        Int      @default(0) // lifetime SALMON collected (minted to TBA)
+  runs          Int      @default(0) // total recorded runs
+  authToken     String   @unique // Apple pass authenticationToken
+  status        String   @default("minting") // minting | ready | failed
+  issueTxHash   String?
+  issueNonce    Int? // the mint tx nonce, persisted with the hash BEFORE broadcast (restart recovery)
+  failureReason String?
+  // Idle cub layer: the card plays itself between runs.
+  idleSalmon      Int       @default(0) // salmon caught while idle (subset of salmon)
+  lastTickAt      DateTime? // idle processed up to this instant
+  lastEvent       String? // latest idle narration line (pass STATUS field)
+  lastPushAt      DateTime? // last idle push (push-cap spacing)
+  lastIdleCatchAt DateTime? // last on-chain idleCatch (cooldown guard)
+  pendingDigest   Int       @default(0) // quiet-hours catches awaiting a morning digest
+  // Card Play: cub-care actions + forks.
+  lastHoneyAt     DateTime? // per-action cooldowns
+  lastFishAt      DateTime?
+  lastExploreAt   DateTime?
+  pendingSalmon   Int       @default(0) // fish-action salmon awaiting the chain cooldown
+  activeFork      String? // current fork scenario id (null = normal actions on the pass)
+  forkExpiresAt   DateTime?
+  // Pocket Cub: Tamagotchi needs (0-100) + care/wander timing.
+  hunger           Int       @default(100)
+  thirst           Int       @default(100)
+  joy              Int       @default(100)
+  lastNeedsAt      DateTime? // last needs-decay computation
+  lastCareAt       DateTime? // last care action or run (wander + reunion timing)
+  lastWaterAt      DateTime? // give-water action cooldown
+  lastWanderPingAt DateTime? // wandered-off ping (once per day max)
+  lastPlayAt       DateTime? // play action cooldown
+  lastToyAt        DateTime? // give-toy action cooldown
+  // WALLETCHI pixel pet.
+  hatched          Boolean   @default(false) // an egg until the first care action
+  toys             Int       @default(0) // accumulated toy props (0..3)
+  critical         Boolean   @default(false) // lapsed but in the reap grace window (fading, revivable)
+  gone             Boolean   @default(false) // survival death (reaped on-chain)
+  won              Boolean   @default(false) // this pet won the season (Victory event)
+  wonPrize         String    @default("0") // prize paid at Victory (raw care-token units)
+  lastStage        Int       @default(0) // highest evolution stage celebrated (0 egg..3 prime)
+  // WALLETCHI memorial: persisted from the vault's memorialState on the reap flip,
+  // so the memorial pass renders real "lived N days / cared X / Outlasted N".
+  bornAt           DateTime? // vault bornAt (season registration)
+  diedAt           DateTime? // vault diedAt (reap)
+  careCount        Int       @default(0) // vault careCount at death
+  deathRank        Int       @default(0) // vault rank (death order; 0 while alive)
+  // Anti-Sybil: the peppered hash of the VERIFIED Privy identity that minted this
+  // pet (null for a custodial/demo mint with no verified session). Stored so a
+  // genuinely failed mint can release the MintedPrivyUser claim, exactly as
+  // fulfillment already releases MintedEmail: without it a keeper whose mint died
+  // on an RPC error would be locked out of the season forever.
+  privyUserHash    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  runSessions   RunSession[]
+  registrations RunnerDeviceRegistration[]
+  events        RunnerEvent[]
+  careSession   CareSession?
+
+  @@index([email])
+  @@index([tokenId])
+}
+
+// On-chain scoped care session: the ONE permission that makes a wallet-pass tap
+// feed the pet with no website and no signature.
+//
+// The owner signs a single Alchemy MAv2 grant (ERC-7715 `functions-on-contract`)
+// that scopes a freshly generated session key to care(uint256,uint8) on the
+// PetVault and NOTHING else, and the server holds that key. Every later pass tap
+// is a gas-sponsored UserOp signed by this key.
+//
+// GRIEF-NOT-THEFT, CHAIN-ENFORCED: the scope lives in the account's validation
+// hooks, not in our code, so a leaked row can only ever FEED the pet. It cannot
+// transfer the NFT or move the pet's tokens anywhere except the game's own
+// burn/pot split. Proven on Robinhood testnet 46630 (2026-08-12): the same
+// session key attempting an NFT transferFrom is rejected at UserOp validation
+// with PreUserOpValidationHookReverted(AddressNotAllowed()). That makes this
+// strictly SAFER than the retired unrestricted care relayer.
+//
+// The private key is sealed with AES-256-GCM under CARE_SESSION_SECRET, and the
+// row is season-bound (vaultAddress) and owner-bound (ownerAddress) so a new
+// season or a sold pet invalidates it instead of silently caring for a stranger.
+model CareSession {
+  serial       String    @id
+  tokenId      String
+  ownerAddress String // the EIP-7702 account the session acts on
+  vaultAddress String // the PetVault the key is scoped to (season-bound)
+  publicKey    String // the session key's address (audit trail + on-chain revoke)
+  secretEnc    String // AES-256-GCM sealed session private key
+  context      String // Alchemy permissions context (the deferred-action blob)
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  revokedReason String?
+  lastUsedAt   DateTime?
+  useCount     Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  runner Runner @relation(fields: [serial], references: [serial], onDelete: Cascade)
+
+  @@index([tokenId])
+  @@index([expiresAt])
+}
+
+// Card Play history: fork resolutions + notable action beats, newest-first.
+model RunnerEvent {
+  id        String   @id @default(uuid())
+  serial    String
+  type      String // fork | action | run
+  message   String
+  createdAt DateTime @default(now())
+
+  runner Runner @relation(fields: [serial], references: [serial], onDelete: Cascade)
+
+  @@index([serial])
+  @@index([createdAt])
+}
+
+// Single-use, TTL-bounded token minted before a run and redeemed at death so a
+// client cannot POST an unbounded stream of scores.
+model RunSession {
+  token     String   @id
+  serial    String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  runner Runner @relation(fields: [serial], references: [serial], onDelete: Cascade)
+
+  @@index([serial])
+}
+
+// Anti-Sybil mint signal: one row per mint ATTEMPT (blocked or minted), driving
+// normalized-email dedup, IP/fingerprint velocity caps, and forensics. Additive
+// table; the email is stored only as a peppered hash, never in the clear.
+model MintSignal {
+  id                  String   @id @default(uuid())
+  normalizedEmailHash String
+  fingerprint         String?
+  ip                  String?
+  subnet              String?
+  outcome             String // "minted" | a block code (already_minted, pow_invalid, ...)
+  botFlags            String? // compact JSON of client bot signals (forensics only)
+  createdAt           DateTime @default(now())
+
+  @@index([normalizedEmailHash])
+  @@index([ip])
+  @@index([fingerprint])
+  @@index([createdAt])
+}
+
+// Anti-Sybil atomic email claim: THE one-inbox-one-pet wall. The unique
+// constraint makes the reserve atomic (insert or P2002), closing the
+// check-then-act race a read-based dedup would leave open even across multiple
+// server instances. Additive; stores only the peppered hash.
+model MintedEmail {
+  emailHash String   @id
+  createdAt DateTime @default(now())
+}
+
+// Anti-Sybil atomic PRIVY-IDENTITY claim: THE one-verified-keeper-one-pet wall.
+//
+// WHY THIS EXISTS AND WHY MintedEmail WAS NOT ENOUGH. The email wall keys on a
+// STRING, and on the self-custody path that string was only ever as trustworthy
+// as its source. A wallet-only Privy login attests no email at all, so the mint
+// route fell back to the caller's own field and finally to a synthesized
+// "<wallet>@wallet.walletchi.local" address that is unique per attacker-generated
+// key by construction. Every downstream gate (normalizeEmail, emailHash,
+// emailAlreadyMinted, reserveEmail) then keyed on a value the minter chose, so
+// the fixed supply was capped by nothing. The verified Privy user id is the one
+// identifier on that path the caller cannot pick, so the supply wall keys on it.
+//
+// subjectHash is HMAC(SYBIL_PEPPER, "privy-user:<userId>"): the primary key makes
+// the claim atomic (insert or P2002), and the pepper keeps the raw Privy id out of
+// the database exactly like the email hashes above.
+model MintedPrivyUser {
+  subjectHash String   @id
+  createdAt   DateTime @default(now())
+}
+
+// Apple Wallet Web Service device registration for RUNNER passes (separate from
+// the PUNCHCARD registrations so the runner pass push path never touches cards).
+model RunnerDeviceRegistration {
+  deviceLibraryId String
+  passTypeId      String
+  serial          String
+  pushToken       String
+  createdAt       DateTime @default(now())
+
+  runner Runner @relation(fields: [serial], references: [serial], onDelete: Cascade)
+
+  @@id([deviceLibraryId, passTypeId, serial])
+  @@index([serial])
+  @@index([passTypeId, serial])
+}
+
+// TAX ECONOMY (2026-08-17): holder airdrop rounds. The 4x/day job snapshots CARE
+// holder balances, allocates the accumulated holder half of the launchpad fee
+// stream pro rata, posts the Merkle root on-chain (HolderMerkleVault) and
+// persists the full tree here so the claim API can serve each holder its proof.
+// The CONTRACT is the source of truth for claimed state; these rows are the
+// proof store + history view.
+model HolderRewardRound {
+  id       Int      @id // on-chain roundId (rounds are append-only)
+  root     String
+  total    String // raw units, decimal string (bigint-safe)
+  token    String // fee token address the round pays in
+  txHash   String?
+  postedAt DateTime @default(now())
+
+  leaves HolderRewardLeaf[]
+}
+
+model HolderRewardLeaf {
+  roundId Int
+  account String // checksummed holder address
+  amount  String // raw units, decimal string
+  proof   String // JSON array of 0x-prefixed sibling hashes
+
+  round HolderRewardRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@id([roundId, account])
+  @@index([account])
+}
+
+// TESTNET SHOWCASE: one row per simulated-fee drip (SHOWCASE_USDG_DRIP). The (token, epoch) primary
+// key IS the idempotency guard: the drip inserts its row BEFORE it sends the mint, so two server
+// instances, or a restart mid-cycle, can never drip the same epoch twice. A failed mint deletes its
+// row so the next cycle retries. Keyed on the fee token too, so a redeployed season (new MockUSDG)
+// starts its own ledger even inside the same 2h epoch.
+model ShowcaseDrip {
+  token     String // fee token (MockUSDG) address, lowercased
+  epoch     Int // floor(unix seconds / 7200)
+  amountRaw String // raw fee-token units, decimal string
+  txHash    String?
+  createdAt DateTime @default(now())
+
+  @@id([token, epoch])
+}

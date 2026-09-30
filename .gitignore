@@ -1,0 +1,26 @@
+node_modules/
+.env
+.env.*
+!.env.example
+out/
+cache/
+broadcast/
+.next/
+dist/
+*.p12
+*.pem
+*.key
+serviceaccount*.json
+server/server.out.log
+server/server.err.log
+server/*.log
+tunnel.out.log
+tunnel.err.log
+# Vercel CLI link. The project's Root Directory is "web-cub", so deploys run
+# `vercel --prod` from THIS repo root (root + web-cub = the app), not from
+# inside web-cub (which would double the path to web-cub/web-cub).
+.vercel
+
+# scratch: address of a freshly deployed account impl, written by deploy helpers
+contracts/.new-impl
+.env*.local
