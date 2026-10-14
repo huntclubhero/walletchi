@@ -77,6 +77,10 @@ export interface RunnerEvent {
   createdAt: Date;
 }
 
+// Most devices one runner pass keeps registered for push. The push loop opens one APNs stream per
+// stored token, so the set per serial is bounded; past it the oldest registration is evicted.
+export const MAX_RUNNER_REGISTRATIONS_PER_SERIAL = 10;
+
 export interface RunnerDeviceRegistration {
   deviceLibraryId: string;
   passTypeId: string;

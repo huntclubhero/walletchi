@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { MAX_RUNNER_REGISTRATIONS_PER_SERIAL } from "./types.js";
 import type {
   CareSession,
   HolderLeaf,
@@ -9,6 +10,9 @@ import type {
   RunnerEvent,
   Store,
 } from "./types.js";
+
+// Most stale registrations one upsert deletes (two bind parameters each; Postgres allows 32767).
+const RUNNER_REGISTRATION_TRIM_BATCH = 500;
 
 // Production Store backed by Prisma/Postgres.
 export class PrismaStore implements Store {
@@ -133,8 +137,30 @@ export class PrismaStore implements Store {
         },
       },
       create: reg,
-      update: { pushToken: reg.pushToken },
+      // createdAt doubles as "last registered", so a rotating device is never the oldest.
+      update: { pushToken: reg.pushToken, createdAt: new Date() },
     });
+    // Keep the newest MAX per serial (this row is always among them). A serial that was crowded
+    // before the cap existed is trimmed oldest first, at most TRIM_BATCH rows per registration, so
+    // one request never builds a delete too large for Postgres; the rest goes on later registrations.
+    const others = {
+      serial: reg.serial,
+      NOT: { deviceLibraryId: reg.deviceLibraryId, passTypeId: reg.passTypeId },
+    };
+    const surplus =
+      (await this.prisma.runnerDeviceRegistration.count({ where: others })) -
+      (MAX_RUNNER_REGISTRATIONS_PER_SERIAL - 1);
+    if (surplus > 0) {
+      const stale = await this.prisma.runnerDeviceRegistration.findMany({
+        where: others,
+        orderBy: { createdAt: "asc" },
+        take: Math.min(surplus, RUNNER_REGISTRATION_TRIM_BATCH),
+        select: { deviceLibraryId: true, passTypeId: true },
+      });
+      await this.prisma.runnerDeviceRegistration.deleteMany({
+        where: { serial: reg.serial, OR: stale },
+      });
+    }
   }
 
   async deleteRunnerRegistration(
@@ -183,8 +209,11 @@ export class PrismaStore implements Store {
   }
 
   async listRunnerPushTokensForSerial(serial: string): Promise<string[]> {
+    // Only the newest MAX, the ones the trim keeps, so rows past the cap never get a push.
     const regs = await this.prisma.runnerDeviceRegistration.findMany({
       where: { serial },
+      orderBy: { createdAt: "desc" },
+      take: MAX_RUNNER_REGISTRATIONS_PER_SERIAL,
       select: { pushToken: true },
     });
     return regs.map((r) => r.pushToken);

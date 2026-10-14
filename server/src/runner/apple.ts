@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { timingSafeEqual } from "node:crypto";
+import { config } from "../config.js";
 import { logger } from "../logger.js";
 import type { AppContext } from "../context.js";
 import type { Runner } from "../store/types.js";
@@ -18,6 +19,11 @@ function tokenEquals(expected: string | null, given: string): boolean {
     return false;
   }
 }
+
+// Registration input bounds. Apple sends a hex device token and a hex device library id; the
+// push token goes straight into the APNs request path, so only path-safe characters are stored.
+const PUSH_TOKEN_RE = /^[A-Za-z0-9_-]{1,200}$/;
+const DEVICE_LIBRARY_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
 // Apple Wallet Web Service for RUNNER passes. Mounted at /runner-apple/v1 (runner
 // passes carry webServiceURL <PUBLIC_BASE_URL>/runner-apple). Deliberately a
@@ -74,8 +80,17 @@ export function runnerAppleWebServiceRouter(ctx: AppContext): Router {
       // re-attach devices).
       const authed = await authRunner(req, res, serial);
       if (!authed) return;
-      const pushToken = (req.body?.pushToken as string) ?? "";
-      if (!pushToken) return res.status(400).json({ error: "missing pushToken" });
+      const pushToken = req.body?.pushToken;
+      if (pushToken === undefined || pushToken === null || pushToken === "") {
+        return res.status(400).json({ error: "missing pushToken" });
+      }
+      if (typeof pushToken !== "string" || !PUSH_TOKEN_RE.test(pushToken)) {
+        return res.status(400).json({ error: "invalid pushToken" });
+      }
+      if (passTypeId !== config.PASS_TYPE_ID) return res.status(400).json({ error: "invalid passTypeId" });
+      if (!DEVICE_LIBRARY_ID_RE.test(deviceLibraryId)) {
+        return res.status(400).json({ error: "invalid deviceLibraryIdentifier" });
+      }
 
       const already =
         (await ctx.store.listRunnerPushTokensForSerial(serial)).length > 0;

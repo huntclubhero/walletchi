@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { MAX_RUNNER_REGISTRATIONS_PER_SERIAL } from "./types.js";
 import type {
   CareSession,
   HolderLeaf,
@@ -126,7 +127,13 @@ export class InMemoryStore implements Store {
     reg: Omit<RunnerDeviceRegistration, "createdAt">,
   ): Promise<void> {
     const key = this.runnerRegKey(reg.deviceLibraryId, reg.passTypeId, reg.serial);
+    // Delete first so Map order is registration order, then evict the oldest of this serial.
+    this.runnerRegistrations.delete(key);
     this.runnerRegistrations.set(key, { ...reg, createdAt: new Date() });
+    const mine = [...this.runnerRegistrations.entries()].filter(([, r]) => r.serial === reg.serial);
+    for (const [k] of mine.slice(0, Math.max(0, mine.length - MAX_RUNNER_REGISTRATIONS_PER_SERIAL))) {
+      this.runnerRegistrations.delete(k);
+    }
   }
 
   async deleteRunnerRegistration(
@@ -164,7 +171,8 @@ export class InMemoryStore implements Store {
     for (const r of this.runnerRegistrations.values()) {
       if (r.serial === serial) tokens.push(r.pushToken);
     }
-    return tokens;
+    // Map order is registration order: only the newest MAX, newest first, as the trim keeps them.
+    return tokens.slice(-MAX_RUNNER_REGISTRATIONS_PER_SERIAL).reverse();
   }
 
   async addRunnerEvent(serial: string, type: string, message: string): Promise<RunnerEvent> {
