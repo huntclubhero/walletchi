@@ -1,0 +1,931 @@
+{
+  "alive": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "947ea42ed4e149324da47cb7e7ef5ebeaa3c5fe9",
+      "strip@2x.png": "a8deb2540b87f2b0df1ab6a5a59b2fe5fa721a63",
+      "strip.png": "aa15c3b656a6e76b16403d474eec0c5ca09ec7b9",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "0fa4fd0b3bb2a7c1c53b9da19a5ecdec58b80cfb"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "relevantDate": "2026-10-05T06:00:00.000Z",
+      "relevantDates": [
+        {
+          "startDate": "2026-10-05T06:00:00.000Z",
+          "endDate": "2026-10-05T09:00:00.000Z"
+        }
+      ],
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(15,74,62)",
+      "labelColor": "rgb(146,226,196)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "bundle-check-auth-token-0123456789",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          },
+          {
+            "key": "carebal",
+            "label": "CARE",
+            "value": "98 CARE"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "petstatus",
+            "label": "STATUS",
+            "value": "HAPPY"
+          },
+          {
+            "key": "life",
+            "label": "SURVIVES",
+            "value": "2026-10-05T09:00:00Z",
+            "dateStyle": "PKDateStyleShort",
+            "timeStyle": "PKDateStyleShort",
+            "isRelative": true
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "status",
+            "label": "PET",
+            "value": "Found a shiny pebble by the river."
+          }
+        ],
+        "backFields": [
+          {
+            "key": "care",
+            "label": "CARE FOR YOUR PET",
+            "value": "Tap an action to keep your pet happy."
+          },
+          {
+            "key": "feed",
+            "label": "FEED",
+            "value": "Feed",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/feed?s=400e1c3237c75f7a317aa71f&src=apple\">Feed</a>"
+          },
+          {
+            "key": "water",
+            "label": "GIVE WATER",
+            "value": "Give water",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/water?s=9c6ecde1c446727ee1017d49&src=apple\">Give water</a>"
+          },
+          {
+            "key": "play",
+            "label": "PLAY",
+            "value": "Play",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/play?s=5584553e0ffa65448a037200&src=apple\">Play</a>"
+          },
+          {
+            "key": "toy",
+            "label": "GIVE A TOY",
+            "value": "Give a toy",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/toy?s=ae1e6fd7a2d1e16b0aa3bb26&src=apple\">Give a toy</a>"
+          },
+          {
+            "key": "explore",
+            "label": "EXPLORE",
+            "value": "Explore",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/explore?s=40bedefc4dbb688a29332ee0&src=apple\">Explore</a>"
+          },
+          {
+            "key": "petNoBack",
+            "label": "PET No.",
+            "value": "0042"
+          },
+          {
+            "key": "tba",
+            "label": "Token-bound account (ERC-6551)",
+            "value": "0xabab...abab"
+          },
+          {
+            "key": "chain",
+            "label": "Network",
+            "value": "Robinhood Chain (testnet)"
+          },
+          {
+            "key": "petPage",
+            "label": "Pet page",
+            "value": "Open your pet's live page",
+            "attributedValue": "<a href=\"https://walletchi.test/pet/bundle-check-serial\">Open your pet's live page</a>"
+          },
+          {
+            "key": "explorer",
+            "label": "View on Blockscout",
+            "value": "https://explorer.testnet.chain.robinhood.com/address/0xabababababababababababababababababababab"
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          },
+          {
+            "key": "testnet",
+            "label": "TESTNET EXPERIENCE",
+            "value": "Runs on Robinhood Chain testnet. Every token here is fake and has no value. This pet is a live demo of the wallet pass standard for NFTs."
+          },
+          {
+            "key": "support",
+            "label": "About",
+            "value": "WALLETCHI: a pet NFT that is its own wallet pass. The front shows its live on-chain state, the links above act on chain, and the card updates when the chain does. Its tokens live in an ERC-6551 account the pet owns."
+          }
+        ]
+      }
+    }
+  },
+  "alive-setup-nudge": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "947ea42ed4e149324da47cb7e7ef5ebeaa3c5fe9",
+      "strip@2x.png": "a8deb2540b87f2b0df1ab6a5a59b2fe5fa721a63",
+      "strip.png": "aa15c3b656a6e76b16403d474eec0c5ca09ec7b9",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "b2e2c347f87fb7d1120a1fe804aec2e3857fc99a"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "relevantDate": "2026-10-05T06:00:00.000Z",
+      "relevantDates": [
+        {
+          "startDate": "2026-10-05T06:00:00.000Z",
+          "endDate": "2026-10-05T09:00:00.000Z"
+        }
+      ],
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(15,74,62)",
+      "labelColor": "rgb(146,226,196)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "bundle-check-auth-token-0123456789",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          },
+          {
+            "key": "carebal",
+            "label": "CARE",
+            "value": "98 CARE"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "petstatus",
+            "label": "STATUS",
+            "value": "HAPPY"
+          },
+          {
+            "key": "life",
+            "label": "SURVIVES",
+            "value": "2026-10-05T09:00:00Z",
+            "dateStyle": "PKDateStyleShort",
+            "timeStyle": "PKDateStyleShort",
+            "isRelative": true
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "status",
+            "label": "PET",
+            "value": "Found a shiny pebble by the river."
+          }
+        ],
+        "backFields": [
+          {
+            "key": "setup",
+            "label": "FINISH SETUP",
+            "value": "Tap any action to finish setup. After that, every button here works on its own."
+          },
+          {
+            "key": "care",
+            "label": "CARE FOR YOUR PET",
+            "value": "Tap an action to keep your pet happy."
+          },
+          {
+            "key": "feed",
+            "label": "FEED",
+            "value": "Feed",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/feed?s=400e1c3237c75f7a317aa71f&src=apple\">Feed</a>"
+          },
+          {
+            "key": "water",
+            "label": "GIVE WATER",
+            "value": "Give water",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/water?s=9c6ecde1c446727ee1017d49&src=apple\">Give water</a>"
+          },
+          {
+            "key": "play",
+            "label": "PLAY",
+            "value": "Play",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/play?s=5584553e0ffa65448a037200&src=apple\">Play</a>"
+          },
+          {
+            "key": "toy",
+            "label": "GIVE A TOY",
+            "value": "Give a toy",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/toy?s=ae1e6fd7a2d1e16b0aa3bb26&src=apple\">Give a toy</a>"
+          },
+          {
+            "key": "explore",
+            "label": "EXPLORE",
+            "value": "Explore",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/explore?s=40bedefc4dbb688a29332ee0&src=apple\">Explore</a>"
+          },
+          {
+            "key": "petNoBack",
+            "label": "PET No.",
+            "value": "0042"
+          },
+          {
+            "key": "tba",
+            "label": "Token-bound account (ERC-6551)",
+            "value": "0xabab...abab"
+          },
+          {
+            "key": "chain",
+            "label": "Network",
+            "value": "Robinhood Chain (testnet)"
+          },
+          {
+            "key": "petPage",
+            "label": "Pet page",
+            "value": "Open your pet's live page",
+            "attributedValue": "<a href=\"https://walletchi.test/pet/bundle-check-serial\">Open your pet's live page</a>"
+          },
+          {
+            "key": "explorer",
+            "label": "View on Blockscout",
+            "value": "https://explorer.testnet.chain.robinhood.com/address/0xabababababababababababababababababababab"
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          },
+          {
+            "key": "testnet",
+            "label": "TESTNET EXPERIENCE",
+            "value": "Runs on Robinhood Chain testnet. Every token here is fake and has no value. This pet is a live demo of the wallet pass standard for NFTs."
+          },
+          {
+            "key": "support",
+            "label": "About",
+            "value": "WALLETCHI: a pet NFT that is its own wallet pass. The front shows its live on-chain state, the links above act on chain, and the card updates when the chain does. Its tokens live in an ERC-6551 account the pet owns."
+          }
+        ]
+      }
+    }
+  },
+  "hungry": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "a3189ea9aed235b14f2e6c1f6adfe997c1a36a7d",
+      "strip@2x.png": "88796363925472247a0ce073f26e93e70d42ad6b",
+      "strip.png": "9419ab96ffaf571c2f9a43b9ce38bf5393075d8a",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "722cd5b104e03a2532265a561edc66fb17398dd8"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "relevantDate": "2026-10-04T15:00:00.000Z",
+      "relevantDates": [
+        {
+          "startDate": "2026-10-04T15:00:00.000Z",
+          "endDate": "2026-10-04T17:00:00.000Z"
+        }
+      ],
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(104,62,14)",
+      "labelColor": "rgb(255,204,138)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "bundle-check-auth-token-0123456789",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          },
+          {
+            "key": "carebal",
+            "label": "CARE",
+            "value": "98 CARE"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "petstatus",
+            "label": "STATUS",
+            "value": "HUNGRY"
+          },
+          {
+            "key": "life",
+            "label": "SURVIVES",
+            "value": "2026-10-04T17:00:00Z",
+            "dateStyle": "PKDateStyleShort",
+            "timeStyle": "PKDateStyleShort",
+            "isRelative": true
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "status",
+            "label": "PET",
+            "value": "Hungry. It has opinions about this."
+          }
+        ],
+        "backFields": [
+          {
+            "key": "care",
+            "label": "CARE FOR YOUR PET",
+            "value": "Tap an action to keep your pet happy."
+          },
+          {
+            "key": "feed",
+            "label": "FEED",
+            "value": "Feed",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/feed?s=400e1c3237c75f7a317aa71f&src=apple\">Feed</a>"
+          },
+          {
+            "key": "water",
+            "label": "GIVE WATER",
+            "value": "Give water",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/water?s=9c6ecde1c446727ee1017d49&src=apple\">Give water</a>"
+          },
+          {
+            "key": "play",
+            "label": "PLAY",
+            "value": "Play",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/play?s=5584553e0ffa65448a037200&src=apple\">Play</a>"
+          },
+          {
+            "key": "toy",
+            "label": "GIVE A TOY",
+            "value": "Give a toy",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/toy?s=ae1e6fd7a2d1e16b0aa3bb26&src=apple\">Give a toy</a>"
+          },
+          {
+            "key": "explore",
+            "label": "EXPLORE",
+            "value": "Explore",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/explore?s=40bedefc4dbb688a29332ee0&src=apple\">Explore</a>"
+          },
+          {
+            "key": "petNoBack",
+            "label": "PET No.",
+            "value": "0042"
+          },
+          {
+            "key": "tba",
+            "label": "Token-bound account (ERC-6551)",
+            "value": "0xabab...abab"
+          },
+          {
+            "key": "chain",
+            "label": "Network",
+            "value": "Robinhood Chain (testnet)"
+          },
+          {
+            "key": "petPage",
+            "label": "Pet page",
+            "value": "Open your pet's live page",
+            "attributedValue": "<a href=\"https://walletchi.test/pet/bundle-check-serial\">Open your pet's live page</a>"
+          },
+          {
+            "key": "explorer",
+            "label": "View on Blockscout",
+            "value": "https://explorer.testnet.chain.robinhood.com/address/0xabababababababababababababababababababab"
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          },
+          {
+            "key": "testnet",
+            "label": "TESTNET EXPERIENCE",
+            "value": "Runs on Robinhood Chain testnet. Every token here is fake and has no value. This pet is a live demo of the wallet pass standard for NFTs."
+          },
+          {
+            "key": "support",
+            "label": "About",
+            "value": "WALLETCHI: a pet NFT that is its own wallet pass. The front shows its live on-chain state, the links above act on chain, and the card updates when the chain does. Its tokens live in an ERC-6551 account the pet owns."
+          }
+        ]
+      }
+    }
+  },
+  "memorial": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "fd3d7a5347fe22089159854a871fd3d874ee7c59",
+      "strip@2x.png": "9257877c61ccc5e141322629d76fef66447b2193",
+      "strip.png": "67b91c3ea889f572068ec833129ef786efd671a3",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "da173378225cf00bb9c4c5859213c41193cdd9db"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(43,39,58)",
+      "labelColor": "rgb(198,187,216)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "bundle-check-auth-token-0123456789",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "petstatus",
+            "label": "STATUS",
+            "value": "GONE"
+          },
+          {
+            "key": "lived",
+            "label": "LIVED",
+            "value": "9 days"
+          },
+          {
+            "key": "cared",
+            "label": "CARED",
+            "value": "33 times"
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "outlasted",
+            "label": "OUTLASTED",
+            "value": "6 pets"
+          }
+        ],
+        "backFields": [
+          {
+            "key": "epitaph",
+            "label": "IN MEMORY",
+            "value": "This pet has passed on. Thank you for the care it knew."
+          },
+          {
+            "key": "petNoBack",
+            "label": "PET No.",
+            "value": "0042"
+          },
+          {
+            "key": "tba",
+            "label": "Token-bound account (ERC-6551)",
+            "value": "0xabab...abab"
+          },
+          {
+            "key": "chain",
+            "label": "Network",
+            "value": "Robinhood Chain (testnet)"
+          },
+          {
+            "key": "petPage",
+            "label": "Pet page",
+            "value": "Open your pet's live page",
+            "attributedValue": "<a href=\"https://walletchi.test/pet/bundle-check-serial\">Open your pet's live page</a>"
+          },
+          {
+            "key": "explorer",
+            "label": "View on Blockscout",
+            "value": "https://explorer.testnet.chain.robinhood.com/address/0xabababababababababababababababababababab"
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          },
+          {
+            "key": "testnet",
+            "label": "TESTNET EXPERIENCE",
+            "value": "Runs on Robinhood Chain testnet. Every token here is fake and has no value. This pet is a live demo of the wallet pass standard for NFTs."
+          },
+          {
+            "key": "support",
+            "label": "About",
+            "value": "WALLETCHI: a pet NFT that is its own wallet pass. The front shows its live on-chain state, the links above act on chain, and the card updates when the chain does. Its tokens live in an ERC-6551 account the pet owns."
+          }
+        ]
+      }
+    }
+  },
+  "champion": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "947ea42ed4e149324da47cb7e7ef5ebeaa3c5fe9",
+      "strip@2x.png": "a8deb2540b87f2b0df1ab6a5a59b2fe5fa721a63",
+      "strip.png": "aa15c3b656a6e76b16403d474eec0c5ca09ec7b9",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "8866a98053527de5911e8e8ea2d48f2f991ee9e4"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(15,74,62)",
+      "labelColor": "rgb(244,197,66)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "bundle-check-auth-token-0123456789",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "petstatus",
+            "label": "STATUS",
+            "value": "WINNER"
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "winner",
+            "label": "WINNER",
+            "value": "Season champion",
+            "changeMessage": "%@"
+          },
+          {
+            "key": "pot",
+            "label": "POT WON",
+            "value": "1,234.5 CARE"
+          }
+        ],
+        "backFields": [
+          {
+            "key": "care",
+            "label": "CARE FOR YOUR PET",
+            "value": "Tap an action to keep your pet happy."
+          },
+          {
+            "key": "feed",
+            "label": "FEED",
+            "value": "Feed",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/feed?s=400e1c3237c75f7a317aa71f&src=apple\">Feed</a>"
+          },
+          {
+            "key": "water",
+            "label": "GIVE WATER",
+            "value": "Give water",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/water?s=9c6ecde1c446727ee1017d49&src=apple\">Give water</a>"
+          },
+          {
+            "key": "play",
+            "label": "PLAY",
+            "value": "Play",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/play?s=5584553e0ffa65448a037200&src=apple\">Play</a>"
+          },
+          {
+            "key": "toy",
+            "label": "GIVE A TOY",
+            "value": "Give a toy",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/toy?s=ae1e6fd7a2d1e16b0aa3bb26&src=apple\">Give a toy</a>"
+          },
+          {
+            "key": "explore",
+            "label": "EXPLORE",
+            "value": "Explore",
+            "attributedValue": "<a href=\"https://api.walletchi.test/api/runner/bundle-check-serial/care/explore?s=40bedefc4dbb688a29332ee0&src=apple\">Explore</a>"
+          },
+          {
+            "key": "petNoBack",
+            "label": "PET No.",
+            "value": "0042"
+          },
+          {
+            "key": "tba",
+            "label": "Token-bound account (ERC-6551)",
+            "value": "0xabab...abab"
+          },
+          {
+            "key": "chain",
+            "label": "Network",
+            "value": "Robinhood Chain (testnet)"
+          },
+          {
+            "key": "petPage",
+            "label": "Pet page",
+            "value": "Open your pet's live page",
+            "attributedValue": "<a href=\"https://walletchi.test/pet/bundle-check-serial\">Open your pet's live page</a>"
+          },
+          {
+            "key": "explorer",
+            "label": "View on Blockscout",
+            "value": "https://explorer.testnet.chain.robinhood.com/address/0xabababababababababababababababababababab"
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          },
+          {
+            "key": "testnet",
+            "label": "TESTNET EXPERIENCE",
+            "value": "Runs on Robinhood Chain testnet. Every token here is fake and has no value. This pet is a live demo of the wallet pass standard for NFTs."
+          },
+          {
+            "key": "support",
+            "label": "About",
+            "value": "WALLETCHI: a pet NFT that is its own wallet pass. The front shows its live on-chain state, the links above act on chain, and the card updates when the chain does. Its tokens live in an ERC-6551 account the pet owns."
+          }
+        ]
+      }
+    }
+  },
+  "keepsake-transfer": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "947ea42ed4e149324da47cb7e7ef5ebeaa3c5fe9",
+      "strip@2x.png": "a8deb2540b87f2b0df1ab6a5a59b2fe5fa721a63",
+      "strip.png": "aa15c3b656a6e76b16403d474eec0c5ca09ec7b9",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "cf45331ff2c9743a7428e2a5dbf62c791f6e1b42"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(14,42,58)",
+      "labelColor": "rgb(249,143,118)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "retired-token-0123456789abcdef",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "status",
+            "label": "STATUS",
+            "value": "TRANSFERRED",
+            "changeMessage": "%@"
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "farewell",
+            "label": "FAREWELL",
+            "value": "This pet has moved to a new wallet."
+          }
+        ],
+        "backFields": [
+          {
+            "key": "transferredNote",
+            "label": "Transferred",
+            "value": "This pet was claimed by its new owner, so this pass is now a keepsake. Care actions no longer work from here."
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          }
+        ]
+      }
+    }
+  },
+  "keepsake-reset": {
+    "files": [
+      "icon.png",
+      "icon@2x.png",
+      "icon@3x.png",
+      "logo.png",
+      "logo@2x.png",
+      "logo@3x.png",
+      "manifest.json",
+      "pass.json",
+      "signature",
+      "strip.png",
+      "strip@2x.png",
+      "strip@3x.png"
+    ],
+    "manifest": {
+      "strip@3x.png": "947ea42ed4e149324da47cb7e7ef5ebeaa3c5fe9",
+      "strip@2x.png": "a8deb2540b87f2b0df1ab6a5a59b2fe5fa721a63",
+      "strip.png": "aa15c3b656a6e76b16403d474eec0c5ca09ec7b9",
+      "logo@3x.png": "f3afdf6239c1cfb34443715a51e571bf21e0b005",
+      "logo@2x.png": "a4a4339e529b8fbb984af9c527b846d25394022b",
+      "logo.png": "b9072012646e7145c0e5f87e0ad3f16c483eb2f9",
+      "icon@3x.png": "b433bba870f537eacbf2c30111031e55d734549d",
+      "icon@2x.png": "21e59cfe9e934cebbc42fc04d89517ed8751c8e7",
+      "icon.png": "2f2b9c8aa41fa21e5d9c3b469b5cd9a0fccc7297",
+      "pass.json": "5133801e8aa9a1e10beafcd6ee0561a6eb0b5c7f"
+    },
+    "passJson": {
+      "formatVersion": 1,
+      "passTypeIdentifier": "pass.com.example.bundlecheck",
+      "teamIdentifier": "BUNDLECHK0",
+      "serialNumber": "bundle-check-serial",
+      "organizationName": "WALLETCHI",
+      "description": "WALLETCHI, a virtual pet that lives in your wallet",
+      "foregroundColor": "rgb(234,243,245)",
+      "backgroundColor": "rgb(14,42,58)",
+      "labelColor": "rgb(249,143,118)",
+      "webServiceURL": "https://api.walletchi.test/runner-apple",
+      "authenticationToken": "retired-token-0123456789abcdef",
+      "sharingProhibited": true,
+      "storeCard": {
+        "headerFields": [
+          {
+            "key": "petno",
+            "label": "NO.",
+            "value": "0042"
+          }
+        ],
+        "primaryFields": [],
+        "secondaryFields": [
+          {
+            "key": "status",
+            "label": "STATUS",
+            "value": "LINKS RESET",
+            "changeMessage": "%@"
+          }
+        ],
+        "auxiliaryFields": [
+          {
+            "key": "farewell",
+            "label": "RESET",
+            "value": "You reset this card's links. Add the fresh card from your account."
+          }
+        ],
+        "backFields": [
+          {
+            "key": "transferredNote",
+            "label": "Links reset",
+            "value": "You asked for this pet's pass links to be reset, so this card is now a keepsake and its buttons no longer work. Sign in to your account page and add the fresh card."
+          },
+          {
+            "key": "serialBack",
+            "label": "Serial",
+            "value": "bundle-check-serial"
+          }
+        ]
+      }
+    }
+  }
+}
