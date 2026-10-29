@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#160b2b">
+<title>CHI NIGHT</title>
+<style>
+  :root { --sat: env(safe-area-inset-top); --sar: env(safe-area-inset-right); --sab: env(safe-area-inset-bottom); --sal: env(safe-area-inset-left); }
+  html, body { margin: 0; height: 100%; background: #160b2b; overflow: hidden; overscroll-behavior: none; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  canvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; }
+  #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #ffd27a; font: 800 13px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="boot">LOADING</div>
+<script>window.CHI = /*__BOOT__*/null;</script>
+<script src="/night-assets/art.js?v=__V__"></script>
+<script src="/night-assets/night.js?v=__V__"></script>
+</body>
+</html>

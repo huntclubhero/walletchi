@@ -1,0 +1,67 @@
+name: contracts
+
+on:
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts.yml"
+  push:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry 1.8.0
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.0
+
+      # The legacy tree contains pre-existing formatting drift. Keep the hardening patch formatted
+      # without turning this security change into a repository-wide mechanical rewrite.
+      - name: Check hardened files formatting
+        run: |
+          forge fmt --check \
+            src/runner/CareFeeSplitter.sol \
+            src/runner/CareRewardsDistributor.sol \
+            src/runner/HolderMerkleVault.sol \
+            src/runner/Pet721.sol \
+            src/runner/PetIssuer.sol \
+            src/runner/PetVault.sol \
+            src/runner/WalletchiTransferValidator.sol \
+            script/DeployWalletchi.s.sol \
+            script/VerifyWalletchiWiring.s.sol \
+            test/runner/AdversaryPet721.t.sol \
+            test/runner/AuditWave4.t.sol \
+            test/runner/Pet721v2.t.sol \
+            test/runner/PetVaultInvariants.t.sol \
+            test/runner/PonsCareToken.t.sol \
+            test/runner/RewardEconomyHardening.t.sol \
+            test/runner/Season2ImmortalWinner.t.sol \
+            test/runner/Season2PushRewards.t.sol \
+            test/runner/TaxEconomy.t.sol \
+            test/runner/WalletchiTransferValidator.t.sol
+
+      - name: Build production contracts
+        run: forge build --skip test --skip script
+
+      - name: Run complete test suite
+        run: forge test
